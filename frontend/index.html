@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SIH26192 Flash Flood Risk Prototype</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>Flash Flood Risk Assessment</h1>
+    <p>SIH26192 prototype · Kerala demonstration</p>
+  </div>
+  <div class="badge">DEMO / NOT AN OPERATIONAL ALERT</div>
+</header>
+<main>
+  <section class="grid">
+    <div class="card controls">
+      <h2>Scenario</h2>
+      <div class="button-row">
+        <button data-scenario="normal">Normal</button>
+        <button data-scenario="heavy">Heavy</button>
+        <button data-scenario="extreme">Extreme</button>
+      </div>
+
+      <label>Location
+        <select id="location"></select>
+      </label>
+      <label>Rainfall last 1 hour (mm)
+        <input id="rain_1h_mm" type="number" min="0" step="1">
+      </label>
+      <label>Rainfall last 24 hours (mm)
+        <input id="rain_24h_mm" type="number" min="0" step="1">
+      </label>
+      <label>Forecast next 6 hours (mm)
+        <input id="forecast_6h_mm" type="number" min="0" step="1">
+      </label>
+      <label>Soil moisture (%)
+        <input id="soil_moisture_pct" type="number" min="0" max="100" step="1">
+      </label>
+      <label>River level (m)
+        <input id="river_level_m" type="number" min="0" step="0.1">
+      </label>
+      <button id="predict" class="primary">Calculate Flood Risk</button>
+    </div>
+
+    <div class="card result">
+      <h2>Prediction</h2>
+      <div id="score" class="score">--</div>
+      <div id="riskClass" class="risk">Awaiting input</div>
+      <div id="method">Transparent weighted rule-based prototype</div>
+      <h3>Why?</h3>
+      <ul id="reasons"><li>Choose a scenario and calculate.</li></ul>
+      <h3>Suggested action</h3>
+      <p id="action">—</p>
+    </div>
+  </section>
+
+  <section class="grid lower">
+    <div class="card">
+      <h2>Risk contribution</h2>
+      <div id="components"></div>
+      <p class="formula">Weights: recent 35% · 24h 15% · forecast 20% · soil 15% · terrain 10% · river 5%</p>
+    </div>
+    <div class="card map-card">
+      <h2>Selected Kerala locations</h2>
+      <div id="map"></div>
+    </div>
+  </section>
+</main>
+<footer>Prototype for SIH26192 · Simulated scenario inputs are clearly separated from future real-data integration.</footer>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

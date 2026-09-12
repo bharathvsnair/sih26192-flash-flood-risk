@@ -1,0 +1,12 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run SIH26192",
+            "type": "shell",
+            "command": "${workspaceFolder}/run.sh",
+            "isBackground": true,
+            "problemMatcher": []
+        }
+    ]
+}
