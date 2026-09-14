@@ -132,36 +132,6 @@ On Windows, the same `python -m http.server 5500` works if Python is installed.
 
 The checked-in CSV and JSON are **simulated demonstration inputs**, not measured observations. A future data pipeline could replace them with IMD or KSDMA rainfall and flood records, NASA or Copernicus soil-moisture products, SRTM elevation/slope, river observations from responsible authorities, and OpenStreetMap locations. The team should cite each dataset, align timestamps and locations, clean missing values, and validate thresholds with domain experts before making any operational claim.
 
-## Five-to-seven-minute presentation
-
-1. **0:00-0:45:** State the problem and the honest prototype scope.
-2. **0:45-1:30:** Show the architecture: CSV/JSON -> FastAPI -> score -> dashboard.
-3. **1:30-3:30:** Run Normal, Heavy and Extreme at Munnar; point out score, class, reasons and action.
-4. **3:30-4:30:** Change to another Idukki location and explain terrain values on the map.
-5. **4:30-5:30:** Show the formula and `/docs`; mention the optional Random Forest.
-6. **5:30-6:30:** Explain simulated data, limitations and the real-data replacement plan.
-
-Likely judge questions:
-
-- **Is this real-time?** No. It is a local prototype with simulated inputs; live feeds are future work.
-- **Why trust the score?** The weights are transparent and sum to 100; they are assumptions, not a validated warning threshold.
-- **Why use ML?** The optional model shows how labelled data could be used later, but the transparent score remains the demo authority.
-- **What happens without ML?** The rule-based prediction works independently; run the app without `flood_model.pkl`.
-- **What is needed for deployment?** Validated historical events, official data agreements, spatial processing, uncertainty estimates and expert review.
-
-## Git/GitHub basics
-
-```bash
-git init
-git add .
-git commit -m "Build SIH26192 flash flood prototype"
-git branch -M main
-git remote add origin https://github.com/<team>/<repository>.git
-git push -u origin main
-```
-
-Never commit `.venv/`, secrets or downloaded large datasets. Commit the small demo files and document any future data-download script.
-
 ## Common issues
 
 - `ModuleNotFoundError`: activate the virtual environment and run `pip install -r requirements.txt`.
