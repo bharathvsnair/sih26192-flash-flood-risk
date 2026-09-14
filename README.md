@@ -12,6 +12,24 @@ It intentionally does **not** claim to be a validated operational flood warning 
 
 CSV/JSON -> FastAPI -> transparent scoring (+ optional Random Forest comparison) -> browser dashboard -> Leaflet map
 
+### MVP features
+
+- Inputs for 1-hour rainfall, 24-hour rainfall, 6-hour forecast, soil moisture and river level.
+- Location-based terrain values: elevation, slope and river alert level from `locations.csv`.
+- A 0-100 score with Low (`0-34`), Moderate (`35-64`) or High (`65-100`).
+- Top reasons, weighted contributions and a suggested action.
+- Normal, heavy and extreme simulated scenarios.
+- Five Idukki locations on an OpenStreetMap/Leaflet map.
+- Health, locations, scenarios and prediction endpoints.
+
+### Formula
+
+Each input is converted to a 0-100 sub-score and multiplied by its weight:
+
+`risk = recent*0.35 + rain24*0.15 + forecast*0.20 + soil*0.15 + terrain*0.10 + river*0.05`
+
+The weights are exactly `35 + 15 + 20 + 15 + 10 + 5 = 100`. Rainfall and forecast dominate because intense or continuing rain is the main short-term trigger. Wet soil has less capacity to absorb water. Slope and elevation represent demo terrain susceptibility. River level captures existing channel pressure.
+
 ## Risk formula
 
 - Recent rainfall: 35%
@@ -49,6 +67,34 @@ python ml/train_model.py
 
 The training file is a **tiny demonstration dataset**. It is not historical validation data. The Random Forest is therefore shown only as an optional comparison in the UI.
 
+## First coding session
+
+1. Create and activate `.venv`, then install `requirements.txt`.
+2. Run the three scenario calculations in the dashboard and record the scores.
+3. Open `/docs`, call `/api/health`, `/api/locations`, `/api/scenarios`, and `/api/predict`.
+4. Train the optional model only after the rule-based demo works.
+5. Rehearse the demo with one person changing scenarios and one person explaining the formula.
+
+## API smoke tests
+
+With the backend running, use these commands in a second terminal:
+
+```bash
+curl http://127.0.0.1:8000/api/health
+curl http://127.0.0.1:8000/api/locations
+curl http://127.0.0.1:8000/api/scenarios
+curl -X POST http://127.0.0.1:8000/api/predict \
+	-H "Content-Type: application/json" \
+	-d '{"location_id":1,"rain_1h_mm":45,"rain_24h_mm":150,"forecast_6h_mm":90,"soil_moisture_pct":68,"river_level_m":4.7}'
+```
+
+The Windows PowerShell equivalent for the POST is:
+
+```powershell
+$body = @{ location_id=1; rain_1h_mm=45; rain_24h_mm=150; forecast_6h_mm=90; soil_moisture_pct=68; river_level_m=4.7 } | ConvertTo-Json
+Invoke-RestMethod http://127.0.0.1:8000/api/predict -Method Post -ContentType 'application/json' -Body $body
+```
+
 ## Run backend
 
 ```bash
@@ -81,6 +127,40 @@ On Windows, the same `python -m http.server 5500` works if Python is installed.
 6. Explain how the score changes and which factors contributed most.
 7. Show the map and explain that the values are demo inputs.
 8. Open `/docs` and show the API if a judge asks about the backend.
+
+## Data plan and limitations
+
+The checked-in CSV and JSON are **simulated demonstration inputs**, not measured observations. A future data pipeline could replace them with IMD or KSDMA rainfall and flood records, NASA or Copernicus soil-moisture products, SRTM elevation/slope, river observations from responsible authorities, and OpenStreetMap locations. The team should cite each dataset, align timestamps and locations, clean missing values, and validate thresholds with domain experts before making any operational claim.
+
+## Five-to-seven-minute presentation
+
+1. **0:00-0:45:** State the problem and the honest prototype scope.
+2. **0:45-1:30:** Show the architecture: CSV/JSON -> FastAPI -> score -> dashboard.
+3. **1:30-3:30:** Run Normal, Heavy and Extreme at Munnar; point out score, class, reasons and action.
+4. **3:30-4:30:** Change to another Idukki location and explain terrain values on the map.
+5. **4:30-5:30:** Show the formula and `/docs`; mention the optional Random Forest.
+6. **5:30-6:30:** Explain simulated data, limitations and the real-data replacement plan.
+
+Likely judge questions:
+
+- **Is this real-time?** No. It is a local prototype with simulated inputs; live feeds are future work.
+- **Why trust the score?** The weights are transparent and sum to 100; they are assumptions, not a validated warning threshold.
+- **Why use ML?** The optional model shows how labelled data could be used later, but the transparent score remains the demo authority.
+- **What happens without ML?** The rule-based prediction works independently; run the app without `flood_model.pkl`.
+- **What is needed for deployment?** Validated historical events, official data agreements, spatial processing, uncertainty estimates and expert review.
+
+## Git/GitHub basics
+
+```bash
+git init
+git add .
+git commit -m "Build SIH26192 flash flood prototype"
+git branch -M main
+git remote add origin https://github.com/<team>/<repository>.git
+git push -u origin main
+```
+
+Never commit `.venv/`, secrets or downloaded large datasets. Commit the small demo files and document any future data-download script.
 
 ## Common issues
 
