@@ -3,20 +3,29 @@ let locations = [];
 let scenarios = {};
 let map;
 let markers = [];
+let selectedScenario = "normal";
 
 const el = id => document.getElementById(id);
 
+function setStatus(message, state = "info") {
+  const status = el("status");
+  status.textContent = message;
+  status.className = `status ${state}`;
+}
+
 async function loadData() {
-  const [locRes, scRes] = await Promise.all([
+  const [healthRes, locRes, scRes] = await Promise.all([
+    fetch(`${API}/health`),
     fetch(`${API}/locations`),
     fetch(`${API}/scenarios`)
   ]);
-  if (!locRes.ok || !scRes.ok) throw new Error("Backend is not running or cannot be reached.");
+  if (!healthRes.ok || !locRes.ok || !scRes.ok) throw new Error("The local backend returned an error.");
   locations = (await locRes.json()).locations;
   scenarios = await scRes.json();
   fillLocations();
   initMap();
   applyScenario("normal");
+  setStatus("Backend connected · demonstration data loaded", "success");
 }
 
 function fillLocations() {
@@ -26,20 +35,35 @@ function fillLocations() {
 }
 
 function initMap() {
+  if (typeof L === "undefined") {
+    el("map").hidden = true;
+    el("mapFallback").hidden = false;
+    return;
+  }
   map = L.map("map").setView([9.95, 77.02], 9);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  const tiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: '&copy; OpenStreetMap contributors'
   }).addTo(map);
+  tiles.on("tileerror", () => {
+    el("mapFallback").hidden = false;
+  });
   markers = locations.map(l => L.marker([l.lat, l.lon]).addTo(map)
     .bindPopup(`<b>${l.name}</b><br>${l.district}<br>Elevation: ${l.elevation_m} m<br>Slope: ${l.slope_deg}°`));
 }
 
 function applyScenario(name) {
   const s = scenarios[name];
+  if (!s) return;
+  selectedScenario = name;
   ["normal", "heavy", "extreme"].forEach(n => {
     document.querySelector(`[data-scenario="${n}"]`).classList.toggle("active", n === name);
   });
   Object.keys(s).forEach(k => { if (el(k)) el(k).value = s[k]; });
+  predict().catch(showError);
+}
+
+function showError(error) {
+  setStatus(error.message, "error");
 }
 
 async function predict() {
@@ -57,11 +81,14 @@ async function predict() {
   const data = await res.json();
   if (!res.ok) throw new Error(data.detail || "Prediction failed");
   render(data);
+  setStatus(`Backend connected · ${selectedScenario} scenario calculated`, "success");
 }
 
 function render(data) {
   el("score").textContent = data.risk_score;
   el("riskClass").textContent = data.risk_class;
+  el("riskClass").className = `risk ${data.risk_class.toLowerCase()}`;
+  el("locationDetails").textContent = `${data.location.name}, ${data.location.district} · Elevation ${data.location.elevation_m} m · Slope ${data.location.slope_deg}° · River alert ${data.location.river_alert_level_m} m`;
   el("method").textContent = data.method + (data.optional_ml_class ? ` · Optional RF: ${data.optional_ml_class}` : "");
   el("reasons").innerHTML = data.reasons.map(r => `<li>${r}</li>`).join("");
   el("action").textContent = data.action;
@@ -75,8 +102,15 @@ function render(data) {
   if (markers[marker]) markers[marker].openPopup();
 }
 
+function resetForm() {
+  el("location").selectedIndex = 0;
+  applyScenario("normal");
+}
+
 ["normal", "heavy", "extreme"].forEach(name => {
   document.querySelector(`[data-scenario="${name}"]`).addEventListener("click", () => applyScenario(name));
 });
-el("predict").addEventListener("click", () => predict().catch(err => alert(err.message)));
-loadData().catch(err => alert(err.message));
+el("location").addEventListener("change", () => predict().catch(showError));
+el("predict").addEventListener("click", () => predict().catch(showError));
+el("reset").addEventListener("click", resetForm);
+loadData().catch(showError);

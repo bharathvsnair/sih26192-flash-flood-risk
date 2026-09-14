@@ -5,6 +5,9 @@ h1 { margin:0 0 5px; font-size:28px; }
 header p { margin:0; color:#62707c; }
 .badge { padding:8px 12px; border:1px solid #d9a441; border-radius:999px; font-size:12px; font-weight:bold; background:#fff8e6; }
 main { width:min(1200px, 92%); margin:24px auto; }
+.status { padding:10px 14px; margin-bottom:18px; border-radius:9px; background:#edf2f7; color:#52606d; font-size:14px; }
+.status.success { background:#e7f6ec; color:#176b36; }
+.status.error { background:#fdecec; color:#9b2424; }
 .grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
 .lower { margin-top:20px; }
 .card { background:#fff; border:1px solid #d9e0e7; border-radius:16px; padding:22px; box-shadow:0 4px 14px rgba(0,0,0,.04); }
@@ -15,13 +18,21 @@ input, select, button { width:100%; padding:11px 12px; margin-top:7px; border-ra
 button { cursor:pointer; background:#f5f7f9; }
 .button-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
 .button-row button.active { border:2px solid #111827; }
+.control-actions { display:grid; grid-template-columns:1fr auto; gap:8px; align-items:end; }
+.control-actions button { margin-top:14px; }
 .primary { background:#111827; color:white; border-color:#111827; font-weight:bold; margin-top:14px; }
+.demo-label { color:#9b5b00; font-size:11px; font-weight:800; letter-spacing:.08em; }
 .score { font-size:72px; line-height:1; font-weight:800; margin:14px 0 8px; }
 .risk { display:inline-block; padding:7px 13px; border-radius:999px; font-weight:800; background:#edf2f7; margin-bottom:8px; }
+.risk.low { background:#dff4e5; color:#176b36; }
+.risk.moderate { background:#fff0c9; color:#895700; }
+.risk.high { background:#fde0e0; color:#a32626; }
+.location-details, .map-note { color:#62707c; font-size:14px; line-height:1.5; }
 #components > div { margin:10px 0; }
 .bar { height:10px; background:#e5e7eb; border-radius:999px; overflow:hidden; }
 .bar > span { display:block; height:100%; background:#334155; }
 .formula { color:#677481; font-size:13px; }
 #map { height:420px; border-radius:12px; overflow:hidden; }
+.map-fallback { margin-top:10px; padding:10px; background:#fff8e6; color:#895700; border-radius:8px; font-size:13px; }
 footer { text-align:center; padding:20px; color:#687581; font-size:13px; }
-@media (max-width: 800px) { .grid { grid-template-columns:1fr; } header { flex-direction:column; align-items:flex-start; } }
+@media (max-width: 800px) { .grid { grid-template-columns:1fr; } header { flex-direction:column; align-items:flex-start; } .control-actions { grid-template-columns:1fr; } }
